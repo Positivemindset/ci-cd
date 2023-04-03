@@ -1,0 +1,31 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/proxycertificatecf/my-image:latest'
+      - '.'
+
+  # Push the Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/proxycertificatecf/my-image:latest'
+
+  # Deploy the Cloud Function
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'my-function'
+      - '--region=us-central1'
+      - '--runtime=python39'
+      - '--memory=128MB'
+      - '--source=https://source.developers.google.com/projects/proxycertificatecf/repos/_/triggers/35c2f7ff-2832-4142-965c-9c945d7f5083'
+      - '--entry-point=hello_world'
+      - '--service-account=proxycertificatecf@appspot.gserviceaccount.com'
+      - '--image=gcr.io/proxycertificatecf/my-image:latest'
+      - '--trigger-http'
+      - '--allow-unauthenticated'
